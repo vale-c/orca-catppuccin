@@ -5,7 +5,7 @@
   "name": "Catppuccin for Orca",
   "version": "1.0.0",
   "execution": "data",
-  "description": "Soothing pastel application themes in all four Catppuccin flavors (Latte, Frappé, Macchiato, Mocha), with matching terminal colors.",
+  "description": "Unofficial port of Catppuccin: soothing pastel app, syntax and terminal themes in all four flavors (Latte, Frappé, Macchiato, Mocha).",
   "license": "MIT",
   "repository": "https://github.com/vale-c/orca-catppuccin/tree/main/plugins/catppuccin",
   "engines": {
