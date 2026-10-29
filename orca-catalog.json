@@ -20,8 +20,8 @@
       "releases": [
         {
           "version": "1.0.0",
-          "commit": "5dded3f8a13147e2f7071bde87920f3c806b05d8",
-          "contentHash": "b74ed22f63b2b9ccd1b529b2f37666e57536d5a6457e79be80e67b25b689ba4f",
+          "commit": "7a8e58f66eec39c26f1883b7be25768a24aca06a",
+          "contentHash": "119684439be28e0bc1b9e3d7ec668df6b40695f0d3c8139eaefee32bf61b34a1",
           "execution": "data",
           "minimumOrca": "1.4.245",
           "name": "Catppuccin for Orca",
@@ -63,7 +63,7 @@
             "cover": {
               "path": "plugins/catppuccin/images/cover.png",
               "alt": "Orca in the four Catppuccin flavors, Latte, Frappé, Macchiato and Mocha, each showing the sidebar and syntax-highlighted TypeScript",
-              "sha256": "c8e9f5a45d9e324b81fdec55c3f96b5fdc8d2fe9be4c59074cbb6fadbf20da59",
+              "sha256": "e0633deac6db5843c12bc476143bf619b526499bf105a1a8e507de5bf52d1288",
               "width": 1600,
               "height": 1000
             }
