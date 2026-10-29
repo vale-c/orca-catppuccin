@@ -1,0 +1,61 @@
+{
+  "manifestVersion": 2,
+  "id": "catppuccin",
+  "publisher": "vale-c",
+  "name": "Catppuccin for Orca",
+  "version": "1.0.0",
+  "execution": "data",
+  "description": "Soothing pastel application themes in all four Catppuccin flavors (Latte, Frappé, Macchiato, Mocha), with matching terminal colors.",
+  "license": "MIT",
+  "repository": "https://github.com/vale-c/orca-catppuccin/tree/main/plugins/catppuccin",
+  "engines": {
+    "orca": ">=1.4.245"
+  },
+  "contributes": {
+    "themes": [
+      {
+        "id": "catppuccin-latte",
+        "title": "Catppuccin Latte",
+        "path": "themes/catppuccin-latte.json"
+      },
+      {
+        "id": "catppuccin-frappe",
+        "title": "Catppuccin Frappé",
+        "path": "themes/catppuccin-frappe.json"
+      },
+      {
+        "id": "catppuccin-macchiato",
+        "title": "Catppuccin Macchiato",
+        "path": "themes/catppuccin-macchiato.json"
+      },
+      {
+        "id": "catppuccin-mocha",
+        "title": "Catppuccin Mocha",
+        "path": "themes/catppuccin-mocha.json"
+      }
+    ],
+    "terminalThemes": [
+      {
+        "id": "catppuccin-latte",
+        "title": "Catppuccin Latte",
+        "path": "terminal/catppuccin-latte.json"
+      },
+      {
+        "id": "catppuccin-frappe",
+        "title": "Catppuccin Frappé",
+        "path": "terminal/catppuccin-frappe.json"
+      },
+      {
+        "id": "catppuccin-macchiato",
+        "title": "Catppuccin Macchiato",
+        "path": "terminal/catppuccin-macchiato.json"
+      },
+      {
+        "id": "catppuccin-mocha",
+        "title": "Catppuccin Mocha",
+        "path": "terminal/catppuccin-mocha.json"
+      }
+    ]
+  },
+  "capabilities": []
+}
