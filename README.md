@@ -42,7 +42,8 @@ cd /path/to/orca && node config/scripts/validate-plugin-files.mjs /path/to/orca-
 
 `scripts/orca-e2e/catppuccin-theme.spec.ts` drives a real Orca build. It loads the plugin as a
 development folder, selects each flavor, and checks the applied app tokens and editor token colors.
-It also saves a screenshot per flavor, which is what the cover is made from. Copy it into the Orca
+It opens a small demo project, `atlas`, created under `CATPPUCCIN_DEMO_DIR` and deleted afterwards,
+and saves a screenshot per flavor, which is what the cover is made from. Copy it into the Orca
 checkout's `tests/e2e/` and run:
 
 ```sh

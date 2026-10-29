@@ -1,4 +1,5 @@
-import { readFile, rm, writeFile } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
+import { mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { Page } from '@stablyai/playwright-test'
 import { expect, test } from './helpers/orca-app'
@@ -6,6 +7,7 @@ import { disablePluginSystem, editorTokenColor, enableDevPlugins, openRepoFile }
 
 const PLUGIN = process.env.CATPPUCCIN_PLUGIN_DIR as string
 const SHOTS = process.env.CATPPUCCIN_SHOTS_DIR as string
+const DEMO_ROOT = process.env.CATPPUCCIN_DEMO_DIR as string
 const KEY = 'vale-c.catppuccin'
 const FLAVORS = [
   { id: 'catppuccin-mocha', title: 'Catppuccin Mocha', base: 'dark' },
@@ -13,7 +15,7 @@ const FLAVORS = [
   { id: 'catppuccin-frappe', title: 'Catppuccin Frappé', base: 'dark' },
   { id: 'catppuccin-latte', title: 'Catppuccin Latte', base: 'light' }
 ] as const
-const CODE_FILE = 'palette.ts'
+const CODE_FILE = 'src/palette.ts'
 const CODE = `// Resolve the palette for the active workspace.
 import { createTheme } from './theme'
 
@@ -28,6 +30,65 @@ export function openWorkspace(ws: Workspace) {
   return { ...theme, title: ws.name }
 }
 `
+
+
+const DEMO_FILES: Record<string, string> = {
+  'package.json': '{ "name": "atlas", "private": true }\n',
+  'README.md': '# atlas\n',
+  'tsconfig.json': '{ "compilerOptions": { "strict": true } }\n',
+  'src/theme.ts': 'export const createTheme = (options: object) => ({ ...options })\n',
+  [CODE_FILE]: CODE
+}
+
+/** A clean project named atlas, added and opened the way a user would, replacing the fixture repo. */
+async function openDemoProject(page: Page, fixtureRepoPath: string): Promise<string> {
+  const dir = join(DEMO_ROOT, 'atlas')
+  await rm(dir, { recursive: true, force: true })
+  for (const [name, text] of Object.entries(DEMO_FILES)) {
+    await mkdir(join(dir, name, '..'), { recursive: true })
+    await writeFile(join(dir, name), text)
+  }
+  const git = (...args: string[]) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' })
+  git('init', '-q', '-b', 'main')
+  git('add', '.')
+  git('-c', 'user.name=atlas', '-c', 'user.email=atlas@example.com', 'commit', '-qm', 'init')
+  const repoPath = await realpath(dir)
+  await page.evaluate(
+    async ({ repoPath, fixtureRepoPath }) => {
+      const added = await window.api.repos.add({ path: repoPath })
+      if ('error' in added) {
+        throw new Error(added.error)
+      }
+      const store = window.__store!
+      await store.getState().fetchRepos({ runtimeEnvironmentId: null, throwOnError: true })
+      const fixture = store.getState().repos.find((repo) => repo.path === fixtureRepoPath)
+      if (fixture) {
+        await store.getState().removeProject(fixture.id, { hostId: fixture.executionHostId ?? 'local', errorFeedback: 'silent' })
+      }
+    },
+    { repoPath, fixtureRepoPath }
+  )
+  await expect
+    .poll(
+      () =>
+        page.evaluate(async (repoPath) => {
+          const store = window.__store!
+          const repo = store.getState().repos.find((entry) => entry.path === repoPath)
+          if (!repo) {
+            return null
+          }
+          await store.getState().fetchWorktrees(repo.id)
+          const worktree = (store.getState().worktreesByRepo[repo.id] ?? [])[0]
+          if (worktree) {
+            store.getState().setActiveWorktree(worktree.id)
+          }
+          return store.getState().activeWorktreeId === worktree?.id ? worktree.id : null
+        }, repoPath),
+      { timeout: 15_000, message: 'the atlas project never became the active workspace' }
+    )
+    .not.toBeNull()
+  return repoPath
+}
 
 const rgb = (hex: string): string =>
   `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`
@@ -57,7 +118,7 @@ test('Catppuccin flavors load and switch', async ({ orcaPage, seededRepoPath }) 
       KEY
     )
     expect(['idle', 'enabled'], JSON.stringify(plugin)).toContain(plugin?.status)
-    await writeFile(join(seededRepoPath, CODE_FILE), CODE)
+    const demoPath = await openDemoProject(orcaPage, await realpath(seededRepoPath))
 
     for (const flavor of FLAVORS) {
       const theme = JSON.parse(await readFile(join(PLUGIN, 'themes', `${flavor.id}.json`), 'utf8'))
@@ -85,7 +146,7 @@ test('Catppuccin flavors load and switch', async ({ orcaPage, seededRepoPath }) 
       )
 
       await orcaPage.evaluate(() => window.__store?.getState().closeSettingsPage())
-      await openRepoFile(orcaPage, seededRepoPath, CODE_FILE)
+      await openRepoFile(orcaPage, demoPath, CODE_FILE)
       const color = (name: string): string =>
         rgb(theme.tokenColors.find((rule: { name: string }) => rule.name === name).settings.foreground)
       await expect.poll(() => editorTokenColor(orcaPage, 'export'), { timeout: 15_000 }).toBe(color('Keywords'))
@@ -102,6 +163,6 @@ test('Catppuccin flavors load and switch', async ({ orcaPage, seededRepoPath }) 
     }
   } finally {
     await disablePluginSystem(orcaPage).catch(() => undefined)
-    await rm(join(seededRepoPath, CODE_FILE), { force: true })
+    await rm(join(DEMO_ROOT, 'atlas'), { recursive: true, force: true })
   }
 })
