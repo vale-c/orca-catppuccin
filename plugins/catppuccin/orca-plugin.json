@@ -57,5 +57,9 @@
       }
     ]
   },
-  "capabilities": []
+  "capabilities": [],
+  "cover": {
+    "path": "images/cover.png",
+    "alt": "Orca in the four Catppuccin flavors, Latte, Frappé, Macchiato and Mocha, each showing the sidebar and syntax-highlighted TypeScript"
+  }
 }
