@@ -2,20 +2,51 @@
 
 [Catppuccin](https://catppuccin.com/) app, editor and terminal themes for
 [Orca](https://github.com/stablyai/orca), in all four flavors: Latte, Frappé, Macchiato and Mocha.
-The plugin lives in [`plugins/catppuccin`](plugins/catppuccin), and its
+This is an unofficial port. The plugin lives in [`plugins/catppuccin`](plugins/catppuccin), and its
 [README](plugins/catppuccin/README.md) lists what it adds and how it differs from upstream.
+
+![Orca in the four Catppuccin flavors](plugins/catppuccin/images/cover.png)
+
+## Flavors
+
+Each flavor themes the app, the editor's syntax colors and the terminal's 16 ANSI colors.
+Mauve is the accent everywhere.
+
+### Mocha
+
+| Editor | Terminal |
+| --- | --- |
+| ![Catppuccin Mocha editor](docs/screenshots/mocha-editor.png) | ![Catppuccin Mocha terminal](docs/screenshots/mocha-terminal.png) |
+
+### Macchiato
+
+| Editor | Terminal |
+| --- | --- |
+| ![Catppuccin Macchiato editor](docs/screenshots/macchiato-editor.png) | ![Catppuccin Macchiato terminal](docs/screenshots/macchiato-terminal.png) |
+
+### Frappé
+
+| Editor | Terminal |
+| --- | --- |
+| ![Catppuccin Frappé editor](docs/screenshots/frappe-editor.png) | ![Catppuccin Frappé terminal](docs/screenshots/frappe-terminal.png) |
+
+### Latte
+
+| Editor | Terminal |
+| --- | --- |
+| ![Catppuccin Latte editor](docs/screenshots/latte-editor.png) | ![Catppuccin Latte terminal](docs/screenshots/latte-terminal.png) |
 
 ## Install
 
-Add this repository as a catalog source:
+1. In Orca, open Settings → Plugins.
+2. Open **Add plugin** → **From a Git URL…**.
+3. Enter `https://github.com/vale-c/orca-catppuccin.git` with ref `main`, and install
+   **Catppuccin for Orca**.
+4. In Settings → Appearance, pick a Catppuccin flavor as the dark theme and another as the light
+   theme. Pick the matching Catppuccin terminal themes in the terminal settings.
 
-1. In Orca, open Settings → Plugins and turn on plugins.
-2. Open ⋯ → **Catalog sources…**.
-3. Add `https://github.com/vale-c/orca-catppuccin.git` with ref `main`.
-4. Install **Catppuccin for Orca** from the catalog.
-
-To try a local copy instead, add the `plugins/catppuccin` folder under **Development folders…**
-in Settings → Plugins. Orca reloads the themes when the files change.
+To try a local copy instead, use **Add plugin** → **From a folder…** and select the
+`plugins/catppuccin` folder. Orca reloads the themes when the files change.
 
 ## Build and verify
 
@@ -43,7 +74,8 @@ cd /path/to/orca && node config/scripts/validate-plugin-files.mjs /path/to/orca-
 `scripts/orca-e2e/catppuccin-theme.spec.ts` drives a real Orca build. It loads the plugin as a
 development folder, selects each flavor, and checks the applied app tokens and editor token colors.
 It opens a small demo project, `atlas`, created under `CATPPUCCIN_DEMO_DIR` and deleted afterwards,
-and saves a screenshot per flavor, which is what the cover is made from. Copy it into the Orca
+and saves an editor and a terminal screenshot per flavor. The cover and `docs/screenshots` are made
+from them. Copy it into the Orca
 checkout's `tests/e2e/` and run:
 
 ```sh
