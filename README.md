@@ -47,7 +47,7 @@ and saves a screenshot per flavor, which is what the cover is made from. Copy it
 checkout's `tests/e2e/` and run:
 
 ```sh
-CATPPUCCIN_PLUGIN_DIR=/path/to/orca-catppuccin/plugins/catppuccin CATPPUCCIN_SHOTS_DIR=/tmp/shots \
+CATPPUCCIN_PLUGIN_DIR=/path/to/orca-catppuccin/plugins/catppuccin CATPPUCCIN_SHOTS_DIR=/tmp/shots CATPPUCCIN_DEMO_DIR=/tmp \
   npx playwright test tests/e2e/catppuccin-theme.spec.ts --config tests/playwright.config.ts --project=electron-headless
 ```
 
