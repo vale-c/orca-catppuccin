@@ -79,8 +79,7 @@
       "scope": [
         "constant",
         "support.constant",
-        "variable.other.constant",
-        "constant.language"
+        "variable.other.constant"
       ],
       "settings": {
         "foreground": "#f05700"
@@ -118,8 +117,7 @@
       "scope": [
         "keyword",
         "storage.type",
-        "storage.modifier",
-        "keyword.control"
+        "storage.modifier"
       ],
       "settings": {
         "foreground": "#8839ef"
@@ -160,8 +158,7 @@
       "name": "Functions",
       "scope": [
         "entity.name.function",
-        "support.function",
-        "meta.function-call"
+        "support.function"
       ],
       "settings": {
         "foreground": "#1e66f5"
