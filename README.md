@@ -40,6 +40,24 @@ cd /path/to/orca && node config/scripts/validate-plugin-files.mjs /path/to/orca-
 
 `verify.mjs` fails when Orca would drop a theme token or a syntax color, or reject a terminal theme.
 
+`scripts/orca-e2e/catppuccin-theme.spec.ts` drives a real Orca build. It loads the plugin as a
+development folder, selects each flavor, and checks the applied app tokens and editor token colors.
+It also saves a screenshot per flavor, which is what the cover is made from. Copy it into the Orca
+checkout's `tests/e2e/` and run:
+
+```sh
+CATPPUCCIN_PLUGIN_DIR=/path/to/orca-catppuccin/plugins/catppuccin CATPPUCCIN_SHOTS_DIR=/tmp/shots \
+  npx playwright test tests/e2e/catppuccin-theme.spec.ts --config tests/playwright.config.ts --project=electron-headless
+```
+
+## Release
+
+`orca-catalog.json` pins each release to the last commit that changed `plugins/catppuccin` and to
+the hash of its files. After a change to the plugin, bump `version` in its manifest, commit, then
+run the Orca validator on the plugin folder. Paste the release entry it prints first in `releases`,
+with `commit` set to `git log -1 --format=%H -- plugins/catppuccin`, and validate the catalog with
+`node config/scripts/validate-plugin-files.mjs /path/to/orca-catppuccin/orca-catalog.json`.
+
 ## License
 
 MIT. See [LICENSE](LICENSE). The Catppuccin palette is MIT licensed by Catppuccin, and its
