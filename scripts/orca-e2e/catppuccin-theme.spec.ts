@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import type { Page } from '@stablyai/playwright-test'
 import { expect, test } from './helpers/orca-app'
 import { disablePluginSystem, editorTokenColor, enableDevPlugins, openRepoFile } from './helpers/plugin-smoke'
+import { discoverActivePtyId, execInTerminal, waitForTerminalOutput } from './helpers/terminal'
 
 const PLUGIN = process.env.CATPPUCCIN_PLUGIN_DIR as string
 const SHOTS = process.env.CATPPUCCIN_SHOTS_DIR as string
@@ -17,41 +18,106 @@ const FLAVORS = [
 ] as const
 const CODE_FILE = 'src/palette.ts'
 const CODE = `// Resolve the palette for the active workspace.
-import { createTheme } from './theme'
+import { createTheme, type Theme } from './theme'
+
+export type Flavor = 'latte' | 'frappe' | 'macchiato' | 'mocha'
 
 export interface Workspace {
   name: string
   tabs: number
+  flavor: Flavor
+  pinned?: boolean
 }
 
-export function openWorkspace(ws: Workspace) {
+const ACCENTS: Record<Flavor, string> = {
+  latte: '#8839ef',
+  frappe: '#ca9ee6',
+  macchiato: '#c6a0f6',
+  mocha: '#cba6f7'
+}
+
+/** Pick a compact layout once a workspace has more than a dozen tabs. */
+export function openWorkspace(ws: Workspace): Theme {
   const theme = createTheme({ contrast: 0.92, accent: 'mauve' })
-  if (ws.tabs > 12) return theme.compact()
-  return { ...theme, title: ws.name }
+  if (ws.tabs > 12 && !ws.pinned) {
+    return theme.compact()
+  }
+  return { ...theme, title: \`\${ws.name} (\${ws.flavor})\`, accent: ACCENTS[ws.flavor] }
+}
+
+export async function loadWorkspaces(url: URL): Promise<Workspace[]> {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(\`atlas: \${response.status}\`)
+  return (await response.json()).filter((ws: Workspace) => /^[a-z-]+$/.test(ws.name))
 }
 `
 
+const PALETTE_SCRIPT = `names='black red green yellow blue magenta cyan white'
+i=0
+for name in $names; do printf '\\033[3%sm%-9s\\033[0m' $i $name; i=$((i + 1)); done; echo
+i=0
+for name in $names; do printf '\\033[9%sm%-9s\\033[0m' $i $name; i=$((i + 1)); done; echo
+for i in 0 1 2 3 4 5 6 7; do printf '\\033[4%sm         \\033[0m' $i; done; echo
+for i in 0 1 2 3 4 5 6 7; do printf '\\033[10%sm         \\033[0m' $i; done; echo
+`
 
-const DEMO_FILES: Record<string, string> = {
-  'package.json': '{ "name": "atlas", "private": true }\n',
-  'README.md': '# atlas\n',
-  'tsconfig.json': '{ "compilerOptions": { "strict": true } }\n',
-  'src/theme.ts': 'export const createTheme = (options: object) => ({ ...options })\n',
-  [CODE_FILE]: CODE
+const DEMO_COMMITS: { message: string; files: Record<string, string> }[] = [
+  {
+    message: 'Scaffold atlas',
+    files: {
+      'package.json': '{ "name": "atlas", "private": true }\n',
+      'tsconfig.json': '{ "compilerOptions": { "strict": true } }\n'
+    }
+  },
+  {
+    message: 'Add the theme factory',
+    files: {
+      'src/theme.ts':
+        'export type Theme = Record<string, unknown> & { compact(): Theme }\n' +
+        'export const createTheme = (options: object): Theme => ({ ...options, compact: () => createTheme(options) })\n'
+    }
+  },
+  { message: 'Resolve the palette per workspace', files: { [CODE_FILE]: CODE } },
+  { message: 'Document the palette script', files: { 'README.md': '# atlas\n', 'scripts/palette.sh': PALETTE_SCRIPT } }
+]
+const DEMO_EDITS: Record<string, string> = {
+  'README.md': '# atlas\n\nWorkspaces that follow the Catppuccin palette.\n',
+  'src/compact.ts': 'export const COMPACT_TAB_LIMIT = 12\n'
 }
+const TERMINAL_DEMO = [
+  "PROMPT='%F{4}atlas%f %F{5}main%f %F{2}❯%f '; clear",
+  'git log --graph --oneline --decorate',
+  'git status -sb',
+  'sh scripts/palette.sh'
+]
 
 /** A clean project named atlas, added and opened the way a user would, replacing the fixture repo. */
 async function openDemoProject(page: Page, fixtureRepoPath: string): Promise<string> {
   const dir = join(DEMO_ROOT, 'atlas')
   await rm(dir, { recursive: true, force: true })
-  for (const [name, text] of Object.entries(DEMO_FILES)) {
-    await mkdir(join(dir, name, '..'), { recursive: true })
-    await writeFile(join(dir, name), text)
+  const write = async (files: Record<string, string>) => {
+    for (const [name, text] of Object.entries(files)) {
+      await mkdir(join(dir, name, '..'), { recursive: true })
+      await writeFile(join(dir, name), text)
+    }
   }
+  await mkdir(dir, { recursive: true })
   const git = (...args: string[]) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' })
   git('init', '-q', '-b', 'main')
-  git('add', '.')
-  git('-c', 'user.name=atlas', '-c', 'user.email=atlas@example.com', 'commit', '-qm', 'init')
+  git('config', 'user.name', 'atlas')
+  git('config', 'user.email', 'atlas@example.com')
+  git('config', 'core.pager', 'cat')
+  git('config', 'color.ui', 'always')
+  for (const commit of DEMO_COMMITS) {
+    await write(commit.files)
+    git('add', '.')
+    git('commit', '-qm', commit.message)
+    if (commit.files[CODE_FILE]) {
+      git('tag', 'v0.3.0')
+    }
+  }
+  git('branch', 'feature/compact')
+  await write(DEMO_EDITS)
   const repoPath = await realpath(dir)
   await page.evaluate(
     async ({ repoPath, fixtureRepoPath }) => {
@@ -104,6 +170,18 @@ async function openSettings(page: Page, pane: string, section: string): Promise<
   await expect(page.locator(`[data-settings-section="${section}"]`)).toBeVisible()
 }
 
+async function showTerminal(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const state = window.__store!.getState()
+    const worktreeId = state.activeWorktreeId!
+    const tab = state.tabsByWorktree[worktreeId]?.[0]
+    if (tab) {
+      state.setActiveTab(tab.id)
+    }
+    state.setActiveTabType('terminal', worktreeId)
+  })
+}
+
 async function choose(page: Page, select: string, option: string): Promise<void> {
   await page.getByRole('combobox', { name: select, exact: true }).click()
   await page.getByRole('option', { name: option, exact: true }).click()
@@ -118,7 +196,14 @@ test('Catppuccin flavors load and switch', async ({ orcaPage, seededRepoPath }) 
       KEY
     )
     expect(['idle', 'enabled'], JSON.stringify(plugin)).toContain(plugin?.status)
+    await orcaPage.setViewportSize({ width: 1440, height: 900 })
     const demoPath = await openDemoProject(orcaPage, await realpath(seededRepoPath))
+    await showTerminal(orcaPage)
+    const ptyId = await discoverActivePtyId(orcaPage)
+    for (const command of TERMINAL_DEMO) {
+      await execInTerminal(orcaPage, ptyId, command)
+    }
+    await waitForTerminalOutput(orcaPage, 'magenta')
 
     for (const flavor of FLAVORS) {
       const theme = JSON.parse(await readFile(join(PLUGIN, 'themes', `${flavor.id}.json`), 'utf8'))
@@ -160,6 +245,9 @@ test('Catppuccin flavors load and switch', async ({ orcaPage, seededRepoPath }) 
       })
       await orcaPage.waitForTimeout(800)
       await orcaPage.screenshot({ path: join(SHOTS, `${flavor.id}.png`) })
+      await showTerminal(orcaPage)
+      await orcaPage.waitForTimeout(800)
+      await orcaPage.screenshot({ path: join(SHOTS, `${flavor.id}-terminal.png`) })
     }
   } finally {
     await disablePluginSystem(orcaPage).catch(() => undefined)
