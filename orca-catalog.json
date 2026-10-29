@@ -12,7 +12,7 @@
         "ref": "main",
         "path": "plugins/catppuccin"
       },
-      "description": "Soothing pastel app, syntax and terminal themes in all four Catppuccin flavors: Latte, Frappé, Macchiato and Mocha.",
+      "description": "Unofficial port of Catppuccin: pastel app, syntax and terminal themes in Latte, Frappé, Macchiato and Mocha.",
       "categories": [
         "themes",
         "terminal-themes"
@@ -20,8 +20,8 @@
       "releases": [
         {
           "version": "1.0.0",
-          "commit": "b04411aba0ce883e66b672957c021a2f07410454",
-          "contentHash": "6a8a6cf2a0196e4c37d71e36eb52c0a63cbc80c3daf5ae75ab4f14ee367a9db4",
+          "commit": "5dded3f8a13147e2f7071bde87920f3c806b05d8",
+          "contentHash": "b74ed22f63b2b9ccd1b529b2f37666e57536d5a6457e79be80e67b25b689ba4f",
           "execution": "data",
           "minimumOrca": "1.4.245",
           "name": "Catppuccin for Orca",
