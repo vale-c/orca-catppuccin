@@ -18,6 +18,57 @@
       ],
       "releases": [
         {
+          "version": "1.0.1",
+          "commit": "f4144fe4c15a725c074abd5af5f74af2ed5cdacb",
+          "contentHash": "ef44f3f57df5b3e4159344757a13284ac4a7a300e89d7494fc5023037a3a0734",
+          "execution": "data",
+          "minimumOrca": "1.4.245",
+          "name": "Catppuccin for Orca",
+          "contributes": [
+            {
+              "kind": "themes",
+              "name": "Catppuccin Latte"
+            },
+            {
+              "kind": "themes",
+              "name": "Catppuccin Frappé"
+            },
+            {
+              "kind": "themes",
+              "name": "Catppuccin Macchiato"
+            },
+            {
+              "kind": "themes",
+              "name": "Catppuccin Mocha"
+            },
+            {
+              "kind": "terminalThemes",
+              "name": "Catppuccin Latte"
+            },
+            {
+              "kind": "terminalThemes",
+              "name": "Catppuccin Frappé"
+            },
+            {
+              "kind": "terminalThemes",
+              "name": "Catppuccin Macchiato"
+            },
+            {
+              "kind": "terminalThemes",
+              "name": "Catppuccin Mocha"
+            }
+          ],
+          "images": {
+            "cover": {
+              "path": "images/cover.png",
+              "alt": "Orca in the four Catppuccin flavors, Latte, Frappé, Macchiato and Mocha, each showing the sidebar and syntax-highlighted TypeScript",
+              "sha256": "e0633deac6db5843c12bc476143bf619b526499bf105a1a8e507de5bf52d1288",
+              "width": 1600,
+              "height": 1000
+            }
+          }
+        },
+        {
           "version": "1.0.0",
           "commit": "3aaa45d326c48c58029c4ac51d70539cf0ffb979",
           "contentHash": "59383a5308e12462d241765b6dc9481905332e7c79d9a34161627a7ad8d28490",
