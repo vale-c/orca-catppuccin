@@ -1,12 +1,12 @@
 // Generates the Catppuccin app and terminal themes from the vendored palette.
-// Usage: node scripts/build.mjs           write plugins/catppuccin/{themes,terminal}/*.json
+// Usage: node scripts/build.mjs           write {themes,terminal}/*.json
 //        node scripts/build.mjs --check   exit 1 if a committed file differs from the output
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
 const ROOT = path.resolve(import.meta.dirname, '..')
-const PLUGIN_DIR = path.join(ROOT, 'plugins', 'catppuccin')
+const PLUGIN_DIR = ROOT
 const PALETTE = JSON.parse(readFileSync(path.join(ROOT, 'scripts', 'catppuccin-palette.json'), 'utf8'))
 const FLAVORS = ['latte', 'frappe', 'macchiato', 'mocha']
 

@@ -21,7 +21,7 @@ const { parsePluginTerminalThemeArtifact } = runtime(
   'shared/plugins/artifacts/plugin-terminal-theme-artifact.ts'
 )
 
-const pluginDir = path.resolve(import.meta.dirname, '..', 'plugins', 'catppuccin')
+const pluginDir = path.resolve(import.meta.dirname, '..')
 const manifest = JSON.parse(readFileSync(path.join(pluginDir, 'orca-plugin.json'), 'utf8'))
 const read = (relative) => readFileSync(path.join(pluginDir, relative), 'utf8')
 
